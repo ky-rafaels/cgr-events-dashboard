@@ -24,14 +24,18 @@ config:
       log:
         default_log_name: opentelemetry.io/collector-exported-log
   extensions:
-    # The health_check extension is mandatory for this chart.
-    # Without the health_check extension the collector will fail the readiness and liveliness probes.
-    # The health_check extension can be modified, but should never be removed.
     health_check:
       endpoint: ${env:MY_POD_IP}:13133
   processors:
     batch: {}
-    # If set to null, will be overridden with values based on k8s resource limits
+    # attributes:
+    #   actions:
+    #     - key: service.name
+    #       value: bigquery-telemetry
+    #       action: insert
+    #     - key: gcp.project.id
+    #       value: YOUR_PROJECT_ID
+    #       action: insert
     memory_limiter:
       check_interval: 1s
       limit_percentage: 65
@@ -41,19 +45,31 @@ config:
       timeout: 10s
   receivers:
     otlp:
+      tls:
+        insecure: true
       protocols:
         grpc:
           endpoint: ${env:MY_POD_IP}:4317
         http:
           endpoint: ${env:MY_POD_IP}:4318
+      retry_on_failure:
+        enabled: true
+      initial_interval: 5s
+      max_interval: 30s
     prometheus:
       config:
         scrape_configs:
-          - job_name: opentelemetry-collector
-            scrape_interval: 10s
-            static_configs:
-              - targets:
-                  - ${env:MY_POD_IP}:8888
+        - job_name: bigquery_metrics
+          metrics_path: /v1/projects/YOUR_PROJECT_ID/locations/global/prometheus
+          authorization:
+            credentials_file: /path/to/service-account-key.json
+          static_configs:
+            - targets: ["monitoring.googleapis.com"]
+          scrape_interval: 60s
+          metric_relabel_configs:
+            - source_labels: [__name__]
+              regex: "^bigquery_.*"
+              action: keep
   service:
     telemetry:
       metrics:
@@ -78,11 +94,11 @@ config:
         receivers:
           - otlp
           - prometheus
-      traces:
-        exporters:
-          - googlecloud 
-        processors:
-          - memory_limiter
-          - batch
-        receivers:
-          - otlp
+      # traces:
+      #   exporters:
+      #     - googlecloud 
+      #   processors:
+      #     - memory_limiter
+      #     - batch
+      #   receivers:
+      #     - otlp
