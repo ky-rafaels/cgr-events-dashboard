@@ -26,13 +26,6 @@ volumes:
     secret:
       secretName: gcp-otel-key
 
-presets:
-  logsCollection:
-    enabled: true
-    includeCollectorLogs: true
-  kubernetesAttributes:
-    enabled: true
-
 securityContext:
   runAsUser: 0
   runAsGroup: 0
@@ -113,11 +106,3 @@ config:
         receivers:
           - otlp
           - prometheus
-      # traces:
-      #   exporters:
-      #     - googlecloud 
-      #   processors:
-      #     - memory_limiter
-      #     - batch
-      #   receivers:
-      #     - otlp
