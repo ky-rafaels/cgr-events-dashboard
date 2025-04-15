@@ -3,6 +3,10 @@ image:
   tag: latest
 mode: deployment
 
+resources:
+  limits:
+    memory: 200Mi
+
 presets:
   logsCollection:
     enabled: true
@@ -25,7 +29,6 @@ config:
     # The health_check extension can be modified, but should never be removed.
     health_check:
       endpoint: ${env:MY_POD_IP}:13133
-    memory_ballast: {}
   processors:
     batch: {}
     # If set to null, will be overridden with values based on k8s resource limits
@@ -33,6 +36,9 @@ config:
       check_interval: 1s
       limit_percentage: 65
       spike_limit_percentage: 20
+    resourcedetection:
+      detectors: [gcp]
+      timeout: 10s
   receivers:
     otlp:
       protocols:
@@ -54,7 +60,6 @@ config:
         address: ${env:MY_POD_IP}:8888
     extensions:
       - health_check
-      - memory_ballast
     pipelines:
       logs:
         exporters:

@@ -8,8 +8,8 @@ helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm
 
 helm repo update
 
-helm upgrade -i open-telemetry/open-telemetry \
---values ./helm/otel-values \
---set command.name="otelcol-k8s"
+helm upgrade -i opentelemetry-collector open-telemetry/opentelemetry-collector \
+--values helm/otel-values.yaml \
+-n opentelemetry-collector \
 --create-namespace 
 ```
