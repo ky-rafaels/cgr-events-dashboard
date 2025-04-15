@@ -1,0 +1,83 @@
+image:
+  repository: cgr.dev/chainguard/opentelemetry-collector-contrib
+  tag: latest
+mode: deployment
+
+presets:
+  logsCollection:
+    enabled: true
+    includeCollectorLogs: true
+  kubernetesAttributes:
+    enabled: true
+
+securityContext:
+  runAsUser: 0
+  runAsGroup: 0
+
+config:
+  exporters:
+    googlecloud:
+      log:
+        default_log_name: opentelemetry.io/collector-exported-log
+  extensions:
+    # The health_check extension is mandatory for this chart.
+    # Without the health_check extension the collector will fail the readiness and liveliness probes.
+    # The health_check extension can be modified, but should never be removed.
+    health_check:
+      endpoint: ${env:MY_POD_IP}:13133
+    memory_ballast: {}
+  processors:
+    batch: {}
+    # If set to null, will be overridden with values based on k8s resource limits
+    memory_limiter:
+      check_interval: 1s
+      limit_percentage: 65
+      spike_limit_percentage: 20
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: ${env:MY_POD_IP}:4317
+        http:
+          endpoint: ${env:MY_POD_IP}:4318
+    prometheus:
+      config:
+        scrape_configs:
+          - job_name: opentelemetry-collector
+            scrape_interval: 10s
+            static_configs:
+              - targets:
+                  - ${env:MY_POD_IP}:8888
+  service:
+    telemetry:
+      metrics:
+        address: ${env:MY_POD_IP}:8888
+    extensions:
+      - health_check
+      - memory_ballast
+    pipelines:
+      logs:
+        exporters:
+          - googlecloud 
+        processors:
+          - memory_limiter
+          - batch
+        receivers:
+          - otlp
+      metrics:
+        exporters:
+          - googlecloud 
+        processors:
+          - memory_limiter
+          - batch
+        receivers:
+          - otlp
+          - prometheus
+      traces:
+        exporters:
+          - googlecloud 
+        processors:
+          - memory_limiter
+          - batch
+        receivers:
+          - otlp
