@@ -4,8 +4,27 @@ image:
 mode: deployment
 
 resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
   limits:
-    memory: 200Mi
+    cpu: "500m"
+    memory: "512Mi"
+
+serviceAccount:
+  create: true
+  name: otel-collector
+
+volumeMounts:
+  - name: gcp-otel-key
+    mountPath: /etc/otel/gcp-service-account.json
+    subPath: service-account-key.json
+    readOnly: true
+
+volumes:
+  - name: gcp-otel-key
+    secret:
+      secretName: gcp-otel-key
 
 presets:
   logsCollection:
