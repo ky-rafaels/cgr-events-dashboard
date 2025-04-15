@@ -15,20 +15,16 @@ serviceAccount:
   create: true
   name: otel-collector
 
-volumeMounts:
+extraVolumeMounts:
   - name: gcp-otel-key
     mountPath: /etc/otel/gcp-service-account.json
     subPath: service-account-key.json
     readOnly: true
 
-volumes:
+extraVolumes:
   - name: gcp-otel-key
     secret:
       secretName: gcp-otel-key
-
-securityContext:
-  runAsUser: 0
-  runAsGroup: 0
 
 config:
   exporters:
