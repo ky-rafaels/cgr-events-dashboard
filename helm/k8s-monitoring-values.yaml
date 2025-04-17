@@ -1,0 +1,12 @@
+alloy-metrics:
+  enabled: true
+clusterMetrics:
+  enabled: true
+clusterEvents:
+  enabled: false 
+destinations:
+  - name: localPrometheus
+    type: prometheus
+    url: http://prometheus.monitoring.svc.cluster.local:9090
+podLogs:
+  enabled: false 
