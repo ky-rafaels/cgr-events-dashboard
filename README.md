@@ -5,7 +5,7 @@ Events dashboard for the purpose of tracking customer registry events and metric
 
 
 
-## Deploy Open Telemetry with Google Cloud Exporter
+<!-- ## Deploy Open Telemetry with Google Cloud Exporter
 
 ```bash
 helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
@@ -16,17 +16,36 @@ helm upgrade -i opentelemetry-collector open-telemetry/opentelemetry-collector \
 --values helm/otel-values.yaml \
 -n opentelemetry-collector \
 --create-namespace 
-```
+``` -->
 
-## Deploy the grafana k8s monitoring stack
+# Deploy the grafana k8s monitoring stack
 
 ```bash
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 
+# K8s monitoring stack
 helm upgrade -i k8s-monitoring grafana/k8s-monitoring \
 --create-namespace \
 --set cluster.name=cluster1 \
 --values helm/k8s-monitoring-values.yaml \
 -n k8s-monitoring
+
+# Grafana Dashboard
+kubectl create ns grafana
+kubectl apply -f k8s/grafana.yaml
+```
+
+# Deploy sample apps 
+
+Deploy a couple sample chainguard apps
+
+```bash
+
+```
+
+Deploy a couple non-changuard apps
+
+```bash
+
 ```
